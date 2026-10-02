@@ -1,6 +1,6 @@
 # dotfiles
 
-My terminal setup: [kitty](https://sw.kovidgoyal.net/kitty/) + zsh with [oh-my-zsh](https://ohmyz.sh/), in the [Catppuccin Frappé](https://catppuccin.com/) palette. The prompt is a native oh-my-zsh theme that rebuilds Oh My Posh's `wholespace` theme. A matching WezTerm + Oh My Posh setup is included for Windows, so both systems show the same prompt.
+My terminal setup: [kitty](https://sw.kovidgoyal.net/kitty/) + zsh with [oh-my-zsh](https://ohmyz.sh/), in the [Catppuccin Frappé](https://catppuccin.com/) palette. The prompt is a native oh-my-zsh theme that rebuilds Oh My Posh's `wholespace` theme. A [WezTerm](https://wezterm.org/) config with the same look and shortcuts as kitty is included for Linux and Windows, along with an [Oh My Posh](https://ohmyposh.dev/) version of the prompt, so every machine shows the same prompt.
 
 ![kitty with the wholespace-frappe prompt](screenshots/prompt.png)
 
@@ -11,8 +11,8 @@ My terminal setup: [kitty](https://sw.kovidgoyal.net/kitty/) + zsh with [oh-my-z
 | `kitty/kitty.conf` | kitty config: Catppuccin Frappé colors, Noto Sans Mono 10pt, 75% opacity with blur, powerline tab bar, custom shortcuts | `~/.config/kitty/kitty.conf` |
 | `zsh/.zshrc` | oh-my-zsh setup with plugins | `~/.zshrc` |
 | `zsh/themes/wholespace-frappe.zsh-theme` | The prompt theme | `~/.oh-my-zsh/custom/themes/` |
-| `windows/wholespace-frappe.omp.json` | The same prompt as an Oh My Posh config, for PowerShell | `%USERPROFILE%\.config\oh-my-posh\` |
-| `windows/.wezterm.lua` | WezTerm config matching kitty | `%USERPROFILE%\.wezterm.lua` |
+| `wezterm/wezterm.lua` | WezTerm config matching kitty: same colors, font, opacity, tab bar and shortcuts | `~/.config/wezterm/wezterm.lua` (Windows: `%USERPROFILE%\.config\wezterm\wezterm.lua`) |
+| `oh-my-posh/wholespace-frappe.omp.json` | The same prompt as an Oh My Posh config, for PowerShell, zsh or bash | `~/.config/oh-my-posh/` (Windows: `%USERPROFILE%\.config\oh-my-posh\`) |
 | `windows/Microsoft.PowerShell_profile.ps1` | PowerShell profile that loads the prompt | `$PROFILE` |
 | `packages/arch.txt` | Arch packages the setup needs | - |
 | `install.sh` | Installs everything on Linux | - |
@@ -78,7 +78,7 @@ exec zsh
 1. Installs `packages/arch.txt` with `sudo pacman -S --needed`. Skip this with `--no-packages`, for example on a non-Arch server.
 2. Installs oh-my-zsh if `~/.oh-my-zsh` doesn't exist.
 3. Clones the two zsh plugins.
-4. Symlinks the configs into place. Any existing file is moved to `<file>.bak-<date>` first.
+4. Symlinks the configs into place. Any existing file is moved to `<file>.bak-<date>` first. `wezterm.lua` and the Oh My Posh config are only linked if `wezterm` / `oh-my-posh` are installed.
 
 Running it again is safe: anything already linked is left alone.
 
@@ -90,10 +90,84 @@ winget install JanDeDobbeleer.OhMyPosh -s winget
 ```
 
 1. Install [Noto Sans Mono](https://fonts.google.com/noto/specimen/Noto+Sans+Mono): unzip it, select the `static\NotoSansMono-*.ttf` files, then right-click and choose **Install**. WezTerm already includes the Nerd Font icons.
-2. Copy `windows/wholespace-frappe.omp.json` to `%USERPROFILE%\.config\oh-my-posh\`.
-3. Copy `windows/.wezterm.lua` to `%USERPROFILE%\`.
-4. Add the lines from `windows/Microsoft.PowerShell_profile.ps1` to `notepad $PROFILE`.
-5. If the profile is blocked from running, use `Set-ExecutionPolicy -Scope CurrentUser RemoteSigned`.
+2. Copy the configs into place (run from the cloned repo):
+
+   ```powershell
+   New-Item -ItemType Directory -Force "$HOME\.config\wezterm", "$HOME\.config\oh-my-posh" | Out-Null
+   Copy-Item wezterm\wezterm.lua "$HOME\.config\wezterm\"
+   Copy-Item oh-my-posh\wholespace-frappe.omp.json "$HOME\.config\oh-my-posh\"
+   ```
+
+3. Set up the prompt as described in [Oh My Posh in PowerShell](#windows-powershell).
+
+The same `wezterm.lua` is used on both systems. On Windows it starts PowerShell 7 (`pwsh.exe`) and uses the Acrylic backdrop for the blur. If you have an older `%USERPROFILE%\.wezterm.lua`, delete it: WezTerm reads that file first.
+
+## WezTerm
+
+`wezterm/wezterm.lua` copies kitty's setup: Catppuccin Frappé colors (kitty's exact values, not WezTerm's built-in scheme), Noto Sans Mono 10pt with ligatures off, a blinking beam cursor, 75% opacity with background blur (KDE Plasma on Linux, Acrylic on Windows), 2000 lines of scrollback, and a powerline tab bar at the bottom that hides when only one tab is open. Tabs are titled like kitty's ("2 windows opened") until renamed with `Alt+N`.
+
+On Linux, install it with `sudo pacman -S wezterm` and rerun `./install.sh` to link the config. `Alt+F5` reloads it, though WezTerm also reloads on its own when the file changes.
+
+The shortcuts are the same as [kitty's](#kitty-shortcuts), and the default WezTerm shortcuts are turned off. A kitty "window" is a WezTerm pane. Differences:
+
+- **`Alt+Enter`** splits the current pane along its longer side, which is roughly what kitty's tiling layouts do.
+- **`Alt+L`**: WezTerm has no layouts to cycle, so this zooms the current pane to fill the tab and back (kitty's `stack` layout).
+- **`Alt+R`** resize mode uses kitty's keys: `w` wider, `n` narrower, `t` taller, `s` shorter (`Ctrl` for bigger steps), or the arrow keys. `Esc` or `Enter` leaves it. The tab bar shows `RESIZE` while it's active.
+- **`Alt+Tab`** is taken by the desktop on both KDE and Windows, so it never reaches the terminal (same as in kitty).
+
+## Oh My Posh
+
+`oh-my-posh/wholespace-frappe.omp.json` draws the same prompt as the zsh theme. It works in any terminal and on any OS. Its icons need a Nerd Font: WezTerm has one built in, and kitty falls back to `ttf-nerd-fonts-symbols-mono`.
+
+### Windows (PowerShell)
+
+1. Install it with `winget install JanDeDobbeleer.OhMyPosh -s winget` (see [Install (Windows 11)](#install-windows-11)), and copy the config to `%USERPROFILE%\.config\oh-my-posh\`.
+2. Open your profile with `notepad $PROFILE` (create it with `New-Item -Force $PROFILE` if it doesn't exist) and add the lines from `windows/Microsoft.PowerShell_profile.ps1`:
+
+   ```powershell
+   oh-my-posh init pwsh --config "$HOME\.config\oh-my-posh\wholespace-frappe.omp.json" | Invoke-Expression
+   ```
+
+3. If the profile is blocked from running, use `Set-ExecutionPolicy -Scope CurrentUser RemoteSigned`.
+4. Open a new WezTerm window.
+
+### Linux (zsh or bash)
+
+On zsh you don't need Oh My Posh: the native theme draws the same prompt and starts faster. Use it on machines where you'd rather share one config file with Windows, or with bash.
+
+1. Install it. On Arch: `yay -S oh-my-posh-bin` (AUR). Anywhere else:
+
+   ```bash
+   curl -s https://ohmyposh.dev/install.sh | bash -s -- -d ~/.local/bin
+   ```
+
+2. Link the config with `./install.sh` (it links it once `oh-my-posh` is on your `PATH`), or by hand:
+
+   ```bash
+   mkdir -p ~/.config/oh-my-posh
+   ln -s ~/dotfiles/oh-my-posh/wholespace-frappe.omp.json ~/.config/oh-my-posh/
+   ```
+
+3. Load it from your shell config.
+
+   **zsh**: in `~/.zshrc`, turn off the oh-my-zsh theme so the two prompts don't fight, then start Oh My Posh after oh-my-zsh is sourced:
+
+   ```zsh
+   ZSH_THEME=""
+   # ...
+   source $ZSH/oh-my-zsh.sh
+   eval "$(oh-my-posh init zsh --config ~/.config/oh-my-posh/wholespace-frappe.omp.json)"
+   ```
+
+   **bash**: add to the end of `~/.bashrc`:
+
+   ```bash
+   eval "$(oh-my-posh init bash --config ~/.config/oh-my-posh/wholespace-frappe.omp.json)"
+   ```
+
+4. Run `exec zsh` (or `exec bash`).
+
+Note that `~/.zshrc` is a symlink into this repo once `install.sh` has run, so editing it changes the repo copy. To switch back, restore `ZSH_THEME="wholespace-frappe"` and remove the `eval` line.
 
 ## kitty shortcuts
 
@@ -117,7 +191,7 @@ Selecting text copies it, and middle-click pastes the selection.
 
 ## Customizing
 
-- **Colors:** edit the `_ws_c` table at the top of the theme. On Windows, edit the `palette` block in the `.omp.json`. Both use the Catppuccin Frappé names (`crust`, `surface0`, `blue`, …).
+- **Colors:** edit the `_ws_c` table at the top of the theme. For Oh My Posh, edit the `palette` block in the `.omp.json`. For WezTerm, edit the `c` table and `config.colors` in `wezterm.lua`. Both use the Catppuccin Frappé names (`crust`, `surface0`, `blue`, …).
 - **Icons:** the `_ws_g` table maps names to Nerd Font code points (`"${(#):-0xE0B2}"`). Look up others at [nerdfonts.com/cheat-sheet](https://www.nerdfonts.com/cheat-sheet).
 - **Segments:** each segment is one `_ws_*` function. To drop one, delete its `left+=` line in `_ws_precmd`.
 

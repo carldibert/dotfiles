@@ -78,6 +78,16 @@ if command -v kitty >/dev/null || [[ -d $HOME/.config/kitty ]]; then
 else
   echo "    skip    kitty.conf (kitty not installed)"
 fi
+if command -v wezterm >/dev/null || [[ -d $HOME/.config/wezterm ]]; then
+  link wezterm/wezterm.lua "$HOME/.config/wezterm/wezterm.lua"
+else
+  echo "    skip    wezterm.lua (wezterm not installed)"
+fi
+if command -v oh-my-posh >/dev/null; then
+  link oh-my-posh/wholespace-frappe.omp.json "$HOME/.config/oh-my-posh/wholespace-frappe.omp.json"
+else
+  echo "    skip    wholespace-frappe.omp.json (oh-my-posh not installed)"
+fi
 
 if [[ "$(basename "${SHELL:-}")" != zsh ]]; then
   say "Your login shell is ${SHELL:-unknown}. Switch with: chsh -s \"\$(command -v zsh)\""
