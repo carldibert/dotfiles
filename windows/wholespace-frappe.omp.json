@@ -1,0 +1,150 @@
+{
+  "$schema": "https://raw.githubusercontent.com/JanDeDobbeleer/oh-my-posh/main/themes/schema.json",
+  "version": 4,
+  "palette": {
+    "crust": "#232634",
+    "mantle": "#292c3c",
+    "surface0": "#414559",
+    "surface1": "#51576d",
+    "lavender": "#babbf1",
+    "blue": "#8caaee",
+    "sapphire": "#85c1dc",
+    "sky": "#99d1db",
+    "green": "#a6d189",
+    "yellow": "#e5c890",
+    "peach": "#ef9f76",
+    "red": "#e78284"
+  },
+  "blocks": [
+    {
+      "type": "prompt",
+      "alignment": "left",
+      "segments": [
+        {
+          "type": "os",
+          "style": "diamond",
+          "background": "p:crust",
+          "foreground": "p:blue",
+          "leading_diamond": "",
+          "trailing_diamond": "<transparent,p:crust></>",
+          "template": " {{ if .WSL }}WSL at {{ end }}{{ .Icon }}",
+          "options": {
+            "arch": " ",
+            "macos": " ",
+            "ubuntu": " ",
+            "windows": " "
+          }
+        },
+        {
+          "type": "time",
+          "style": "diamond",
+          "background": "p:crust",
+          "foreground": "p:peach",
+          "leading_diamond": "",
+          "trailing_diamond": "<transparent,p:crust></>",
+          "template": " ♥ {{ .CurrentDate | date .Format }} ",
+          "options": {
+            "time_format": "15:04:05"
+          }
+        },
+        {
+          "type": "sysinfo",
+          "style": "diamond",
+          "background": "p:surface0",
+          "foreground": "p:sky",
+          "leading_diamond": "",
+          "template": " CPU: {{ round .PhysicalPercentUsed .Precision }}% | "
+        },
+        {
+          "type": "sysinfo",
+          "style": "diamond",
+          "background": "p:surface0",
+          "foreground": "p:sky",
+          "trailing_diamond": "<transparent,p:surface0></>",
+          "template": "RAM: {{ printf \"%.1f\" (divf (sub .PhysicalTotalMemory .PhysicalAvailableMemory) 1073741824.0) }}/{{ printf \"%.0f\" (divf .PhysicalTotalMemory 1073741824.0) }}  "
+        },
+        {
+          "type": "executiontime",
+          "style": "diamond",
+          "background": "p:surface1",
+          "foreground": "p:yellow",
+          "leading_diamond": "",
+          "trailing_diamond": "",
+          "template": " {{ .FormattedMs }} ",
+          "options": {
+            "style": "roundrock",
+            "threshold": 0
+          }
+        }
+      ]
+    },
+    {
+      "type": "prompt",
+      "alignment": "right",
+      "segments": [
+        {
+          "type": "node",
+          "style": "diamond",
+          "background": "p:surface0",
+          "foreground": "p:green",
+          "leading_diamond": "",
+          "trailing_diamond": "<transparent,p:surface0></>",
+          "template": " {{ if .PackageManagerIcon }}{{ .PackageManagerIcon }} {{ end }}{{ .Full }}",
+          "options": {
+            "fetch_package_manager": true,
+            "npm_icon": " <p:red></> ",
+            "yarn_icon": " <p:sapphire></>"
+          }
+        },
+        {
+          "type": "git",
+          "style": "diamond",
+          "background": "p:mantle",
+          "foreground": "p:green",
+          "leading_diamond": "",
+          "trailing_diamond": "",
+          "template": " {{ .UpstreamIcon }}{{ .HEAD }}{{ if .BranchStatus }} {{ .BranchStatus }}{{ end }}{{ if .Working.Changed }}  {{ .Working.String }}{{ end }}{{ if and (.Working.Changed) (.Staging.Changed) }} |{{ end }}{{ if .Staging.Changed }}  {{ .Staging.String }}{{ end }}{{ if gt .StashCount 0 }}  {{ .StashCount }}{{ end }} ",
+          "options": {
+            "branch_icon": " "
+          }
+        }
+      ]
+    },
+    {
+      "type": "prompt",
+      "alignment": "left",
+      "newline": true,
+      "segments": [
+        {
+          "type": "path",
+          "style": "plain",
+          "foreground": "p:blue",
+          "template": "  {{ .Path }} ",
+          "options": {
+            "folder_icon": "",
+            "home_icon": "home",
+            "style": "agnoster_full"
+          }
+        },
+        {
+          "type": "status",
+          "style": "plain",
+          "foreground": "p:green",
+          "foreground_templates": [
+            "{{ if gt .Code 0 }}p:red{{ end }}"
+          ],
+          "template": "  ",
+          "options": {
+            "always_enabled": true
+          }
+        }
+      ]
+    }
+  ],
+  "console_title_template": "{{ .Folder }}",
+  "transient_prompt": {
+    "background": "transparent",
+    "foreground": "p:lavender",
+    "template": " "
+  }
+}

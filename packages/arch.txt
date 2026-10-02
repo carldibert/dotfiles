@@ -1,0 +1,7 @@
+# Arch Linux packages for these dotfiles (install.sh installs them with pacman --needed)
+zsh
+git
+curl
+kitty
+noto-fonts                  # Noto Sans Mono, the terminal font
+ttf-nerd-fonts-symbols-mono # prompt icons (kitty falls back to it automatically)
