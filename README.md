@@ -1,6 +1,6 @@
 # dotfiles
 
-My terminal setup: [kitty](https://sw.kovidgoyal.net/kitty/) + zsh with [oh-my-zsh](https://ohmyz.sh/), in the [Catppuccin Frappé](https://catppuccin.com/) palette. The prompt is a native oh-my-zsh theme that rebuilds Oh My Posh's `wholespace` theme. A [WezTerm](https://wezterm.org/) config with the same look and shortcuts as kitty is included for Linux and Windows, along with an [Oh My Posh](https://ohmyposh.dev/) version of the prompt, so every machine shows the same prompt.
+My terminal setup: [kitty](https://sw.kovidgoyal.net/kitty/) + zsh with [oh-my-zsh](https://ohmyz.sh/), in the [Catppuccin Frappé](https://catppuccin.com/) palette. The prompt is a native oh-my-zsh theme that rebuilds Oh My Posh's `wholespace` theme. A [WezTerm](https://wezterm.org/) config with the same look and shortcuts as kitty is included for Linux and Windows, along with an [Oh My Posh](https://ohmyposh.dev/) version of the prompt, so every machine shows the same prompt. There's also a [Claude Code](https://code.claude.com/) statusline in the same style.
 
 ![kitty with the wholespace-frappe prompt](screenshots/prompt.png)
 
@@ -11,8 +11,10 @@ My terminal setup: [kitty](https://sw.kovidgoyal.net/kitty/) + zsh with [oh-my-z
 | `kitty/kitty.conf` | kitty config: Catppuccin Frappé colors, Noto Sans Mono 10pt, 75% opacity with blur, powerline tab bar, custom shortcuts | `~/.config/kitty/kitty.conf` |
 | `zsh/.zshrc` | oh-my-zsh setup with plugins | `~/.zshrc` |
 | `zsh/themes/wholespace-frappe.zsh-theme` | The prompt theme | `~/.oh-my-zsh/custom/themes/` |
-| `wezterm/wezterm.lua` | WezTerm config matching kitty: same colors, font, opacity, tab bar and shortcuts | `~/.config/wezterm/wezterm.lua` (Windows: `%USERPROFILE%\.config\wezterm\wezterm.lua`) |
+| `wezterm/wezterm.lua` | WezTerm config matching kitty: same colors, font, opacity, tab bar and shortcuts. See [wezterm/README.md](wezterm/README.md) | `~/.config/wezterm/wezterm.lua` (Windows: `%USERPROFILE%\.config\wezterm\wezterm.lua`) |
 | `oh-my-posh/wholespace-frappe.omp.json` | The same prompt as an Oh My Posh config, for PowerShell, zsh or bash | `~/.config/oh-my-posh/` (Windows: `%USERPROFILE%\.config\oh-my-posh\`) |
+| `claude/claude-statusline.omp.json` | Claude Code statusline (Oh My Posh). See [claude/README.md](claude/README.md) | `~/.claude/` |
+| `claude/subagent-statusline.py` | Rows for Claude Code's agent panel | `~/.claude/` |
 | `windows/Microsoft.PowerShell_profile.ps1` | PowerShell profile that loads the prompt | `$PROFILE` |
 | `packages/arch.txt` | Arch packages the setup needs | - |
 | `install.sh` | Installs everything on Linux | - |
@@ -78,7 +80,7 @@ exec zsh
 1. Installs `packages/arch.txt` with `sudo pacman -S --needed`. Skip this with `--no-packages`, for example on a non-Arch server.
 2. Installs oh-my-zsh if `~/.oh-my-zsh` doesn't exist.
 3. Clones the two zsh plugins.
-4. Symlinks the configs into place. Any existing file is moved to `<file>.bak-<date>` first. `wezterm.lua` and the Oh My Posh config are only linked if `wezterm` / `oh-my-posh` are installed.
+4. Symlinks the configs into place. Any existing file is moved to `<file>.bak-<date>` first. `wezterm.lua` and the Oh My Posh config are only linked if `wezterm` / `oh-my-posh` are installed, and the Claude Code statusline only if both `oh-my-posh` and `~/.claude` exist. It doesn't touch `~/.claude/settings.json`: see [claude/README.md](claude/README.md#install) for the lines to add.
 
 Running it again is safe: anything already linked is left alone.
 
@@ -100,20 +102,19 @@ winget install JanDeDobbeleer.OhMyPosh -s winget
 
 3. Set up the prompt as described in [Oh My Posh in PowerShell](#windows-powershell).
 
-The same `wezterm.lua` is used on both systems. On Windows it starts PowerShell 7 (`pwsh.exe`) and uses the Acrylic backdrop for the blur. If you have an older `%USERPROFILE%\.wezterm.lua`, delete it: WezTerm reads that file first.
+The same `wezterm.lua` is used on both systems. On Windows it starts PowerShell 7 (`pwsh.exe`) and uses the Acrylic backdrop for the blur. See [wezterm/README.md](wezterm/README.md#install-windows-11) for details.
 
 ## WezTerm
 
-`wezterm/wezterm.lua` copies kitty's setup: Catppuccin Frappé colors (kitty's exact values, not WezTerm's built-in scheme), Noto Sans Mono 10pt with ligatures off, a blinking beam cursor, 75% opacity with background blur (KDE Plasma on Linux, Acrylic on Windows), 2000 lines of scrollback, and a powerline tab bar at the bottom that hides when only one tab is open. Tabs are titled like kitty's ("2 windows opened") until renamed with `Alt+N`.
+`wezterm/wezterm.lua` copies kitty's colors, font, opacity, tab bar and shortcuts, on Linux and Windows. Setup, shortcuts and screenshots are in [wezterm/README.md](wezterm/README.md).
 
-On Linux, install it with `sudo pacman -S wezterm` and rerun `./install.sh` to link the config. `Alt+F5` reloads it, though WezTerm also reloads on its own when the file changes.
+![WezTerm on KDE Plasma](wezterm/screenshots/wezterm-linux.png)
 
-The shortcuts are the same as [kitty's](#kitty-shortcuts), and the default WezTerm shortcuts are turned off. A kitty "window" is a WezTerm pane. Differences:
+## Claude Code statusline
 
-- **`Alt+Enter`** splits the current pane along its longer side, which is roughly what kitty's tiling layouts do.
-- **`Alt+L`**: WezTerm has no layouts to cycle, so this zooms the current pane to fill the tab and back (kitty's `stack` layout).
-- **`Alt+R`** resize mode uses kitty's keys: `w` wider, `n` narrower, `t` taller, `s` shorter (`Ctrl` for bigger steps), or the arrow keys. `Esc` or `Enter` leaves it. The tab bar shows `RESIZE` while it's active.
-- **`Alt+Tab`** is taken by the desktop on both KDE and Windows, so it never reaches the terminal (same as in kitty).
+`claude/` has a two-line Claude Code statusline drawn by Oh My Posh in the prompt's style: model, context used out of 200k (with checkpoint warnings), usage limits, session time, repo, git, worktree and cost, plus matching rows for the agent panel. Setup is in [claude/README.md](claude/README.md).
+
+![Claude Code with the statusline](claude/screenshots/claude-session.png)
 
 ## Oh My Posh
 
@@ -135,7 +136,7 @@ The shortcuts are the same as [kitty's](#kitty-shortcuts), and the default WezTe
 
 On zsh you don't need Oh My Posh: the native theme draws the same prompt and starts faster. Use it on machines where you'd rather share one config file with Windows, or with bash.
 
-1. Install it. On Arch: `yay -S oh-my-posh-bin` (AUR). Anywhere else:
+1. Install it. On Arch: `paru -S oh-my-posh-bin` (AUR). Anywhere else:
 
    ```bash
    curl -s https://ohmyposh.dev/install.sh | bash -s -- -d ~/.local/bin

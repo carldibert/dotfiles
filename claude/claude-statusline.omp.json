@@ -1,0 +1,137 @@
+{
+  "$schema": "https://raw.githubusercontent.com/JanDeDobbeleer/oh-my-posh/main/themes/schema.json",
+  "version": 4,
+  "palette": {
+    "crust": "#232634",
+    "mantle": "#292c3c",
+    "surface0": "#414559",
+    "surface1": "#51576d",
+    "overlay": "#949cbb",
+    "dim": "#626880",
+    "text": "#c6d0f5",
+    "lavender": "#babbf1",
+    "blue": "#8caaee",
+    "sky": "#99d1db",
+    "teal": "#81c8be",
+    "green": "#a6d189",
+    "yellow": "#e5c890",
+    "red": "#e78284",
+    "pink": "#f4b8e4"
+  },
+  "blocks": [
+    {
+      "type": "prompt",
+      "alignment": "left",
+      "segments": [
+        {
+          "type": "claude",
+          "style": "diamond",
+          "background": "p:crust",
+          "foreground": "p:lavender",
+          "leading_diamond": "",
+          "trailing_diamond": "<transparent,background></>",
+          "template": " 󰯉 {{ .Model.DisplayName }} "
+        },
+        {
+          "type": "claude",
+          "style": "diamond",
+          "background": "p:surface0",
+          "foreground": "p:green",
+          "leading_diamond": "",
+          "trailing_diamond": "<transparent,background></>",
+          "template": "  {{ $t := .ContextWindow.TotalInputTokens }}{{ $f := min 8 (div (mul $t 8) 200000) }}{{ if ge $t 200000 }}<p:text>{{ else }}<>{{ end }}{{ repeat (int $f) \"█\" }}</><p:dim>{{ repeat (int (sub 8 $f)) \"█\" }}</> {{ div $t 1000 }}k/200k{{ if ge $t 200000 }} · CHECKPOINT NOW{{ else if ge $t 150000 }} · checkpoint soon{{ end }} ",
+          "background_templates": [
+            "{{ if ge .ContextWindow.TotalInputTokens 200000 }}p:red{{ end }}"
+          ],
+          "foreground_templates": [
+            "{{ if ge .ContextWindow.TotalInputTokens 200000 }}p:crust{{ else if ge .ContextWindow.TotalInputTokens 150000 }}p:yellow{{ end }}"
+          ]
+        },
+        {
+          "type": "claude",
+          "style": "diamond",
+          "background": "p:surface1",
+          "foreground": "p:sky",
+          "leading_diamond": "",
+          "trailing_diamond": "<transparent,background></>",
+          "template": "{{ if and .RateLimits .RateLimits.FiveHour }} 󰅐 5h {{ .FiveHourUsage }}% {{ if ge (int .FiveHourUsage) 90 }}󰦛 {{ $m := int .FiveHourResetsIn.Minutes }}{{ if ge $m 60 }}{{ div $m 60 }}h{{ end }}{{ mod $m 60 }}m{{ else }}<p:overlay>󰦛 {{ $m := int .FiveHourResetsIn.Minutes }}{{ if ge $m 60 }}{{ div $m 60 }}h{{ end }}{{ mod $m 60 }}m</>{{ end }}{{ end }} ",
+          "background_templates": [
+            "{{ if ge (int .FiveHourUsage) 90 }}p:red{{ end }}"
+          ],
+          "foreground_templates": [
+            "{{ if ge (int .FiveHourUsage) 90 }}p:crust{{ else if ge (int .FiveHourUsage) 70 }}p:yellow{{ end }}"
+          ]
+        },
+        {
+          "type": "claude",
+          "style": "diamond",
+          "background": "p:surface1",
+          "foreground": "p:sky",
+          "leading_diamond": "",
+          "trailing_diamond": "<transparent,background></>",
+          "template": "{{ if and .RateLimits .RateLimits.SevenDay }}  7d {{ .SevenDayUsage }}% {{ if ge (int .SevenDayUsage) 90 }}󰦛 {{ .SevenDayResetsAt.Format \"Mon 15:04\" }}{{ else }}<p:overlay>󰦛 {{ .SevenDayResetsAt.Format \"Mon 15:04\" }}</>{{ end }}{{ end }} ",
+          "background_templates": [
+            "{{ if ge (int .SevenDayUsage) 90 }}p:red{{ end }}"
+          ],
+          "foreground_templates": [
+            "{{ if ge (int .SevenDayUsage) 90 }}p:crust{{ else if ge (int .SevenDayUsage) 70 }}p:yellow{{ end }}"
+          ]
+        },
+        {
+          "type": "claude",
+          "style": "diamond",
+          "background": "p:mantle",
+          "foreground": "p:teal",
+          "leading_diamond": "",
+          "trailing_diamond": "<transparent,background></>",
+          "template": " 󰔛 {{ $s := div .Cost.TotalDurationMS 1000 }}{{ if ge $s 3600 }}{{ div $s 3600 }}h{{ printf \"%02d\" (mod (div $s 60) 60) }}m{{ else }}{{ div $s 60 }}m{{ printf \"%02d\" (mod $s 60) }}s{{ end }} <p:overlay>api {{ $a := div .Cost.TotalAPIDurationMS 1000 }}{{ if ge $a 3600 }}{{ div $a 3600 }}h{{ printf \"%02d\" (mod (div $a 60) 60) }}m{{ else }}{{ div $a 60 }}m{{ printf \"%02d\" (mod $a 60) }}s{{ end }}</> "
+        }
+      ]
+    },
+    {
+      "type": "prompt",
+      "alignment": "left",
+      "newline": true,
+      "segments": [
+        {
+          "type": "claude",
+          "style": "diamond",
+          "background": "p:crust",
+          "foreground": "p:blue",
+          "leading_diamond": "",
+          "trailing_diamond": "<transparent,background></>",
+          "template": "  {{ if .Workspace.Repo }}{{ .Workspace.Repo.Name }}{{ else }}{{ base .Workspace.ProjectDir }}{{ end }} "
+        },
+        {
+          "type": "git",
+          "style": "diamond",
+          "background": "p:surface0",
+          "foreground": "p:green",
+          "leading_diamond": "",
+          "trailing_diamond": "<transparent,background></>",
+          "template": " {{ .HEAD }}{{ if .BranchStatus }} {{ .BranchStatus }}{{ end }}{{ if .Working.Changed }} <p:yellow> {{ .Working.String }}</>{{ end }}{{ if and (.Working.Changed) (.Staging.Changed) }} |{{ end }}{{ if .Staging.Changed }}  {{ .Staging.String }}{{ end }}{{ if gt .StashCount 0 }}  {{ .StashCount }}{{ end }} ",
+          "options": {
+            "branch_icon": " ",
+            "fetch_status": true,
+            "fetch_stash_count": true
+          }
+        },
+        {
+          "type": "claude",
+          "style": "diamond",
+          "background": "p:surface1",
+          "foreground": "p:pink",
+          "leading_diamond": "",
+          "trailing_diamond": "<transparent,background></>",
+          "template": "{{ if .Worktree }}  {{ .Worktree.Name }}{{ if .Worktree.OriginalBranch }} <p:overlay>from {{ .Worktree.OriginalBranch }}</>{{ end }} {{ else if .Workspace.GitWorktree }}  {{ .Workspace.GitWorktree }} {{ end }}"
+        },
+        {
+          "type": "claude",
+          "style": "plain",
+          "foreground": "p:overlay",
+          "template": " ${{ printf \"%.2f\" .Cost.TotalCostUSD }}{{ if or .Cost.TotalLinesAdded .Cost.TotalLinesRemoved }} · <p:green>+{{ .Cost.TotalLinesAdded }}</> <p:red>-{{ .Cost.TotalLinesRemoved }}</>{{ end }}"
+        }
+      ]
+    }
+  ]
+}
