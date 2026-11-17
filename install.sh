@@ -91,7 +91,6 @@ fi
 
 if command -v oh-my-posh >/dev/null && [[ -d $HOME/.claude ]]; then
   link claude/claude-statusline.omp.json "$HOME/.claude/claude-statusline.omp.json"
-  link claude/subagent-statusline.py     "$HOME/.claude/subagent-statusline.py"
   if ! grep -q '"statusLine"' "$HOME/.claude/settings.json" 2>/dev/null; then
     say "Add the statusLine settings from claude/README.md to ~/.claude/settings.json"
   fi

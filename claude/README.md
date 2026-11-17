@@ -41,7 +41,9 @@ The bar always fills toward 200k tokens, whatever the model's real context windo
 
 ## Agent panel
 
-`subagent-statusline.py` renders each row of the panel Claude Code shows while subagents run: the agent's name, its worktree (when it runs in one), how long it has been running, and its tokens and context %. Context turns yellow at 75%. Finished agents get a check mark and their final status. Claude Code draws the tree for nested agents itself, the script only fills in each row.
+The `subagent-rows` mod (`mods/subagent-rows/`) renders each row of the panel Claude Code shows while subagents run: the agent's name, its worktree (when it runs in one), how long it has been running, and its tokens and context %. Context turns yellow at 75%. Finished agents get a check mark and their final status (red if it failed or was killed). Claude Code draws the tree for nested agents itself, the mod only fills in each row.
+
+This used to be a `subagentStatusLine` script (`subagent-statusline.py`). Claude Code 2.1.326 deprecated that setting in favor of mods, so the same rendering now lives in a mod's `AgentRow` render hook.
 
 ![Subagents running in worktrees](screenshots/claude-agents.png)
 
@@ -49,20 +51,18 @@ The bar always fills toward 200k tokens, whatever the model's real context windo
 
 | Need | Arch package | Notes |
 | --- | --- | --- |
-| Claude Code | - | a version with `statusLine` `refreshInterval` and `subagentStatusLine` |
+| Claude Code | - | 2.1.326+ (`statusLine` `refreshInterval`, mods with `AgentRow`) |
 | Oh My Posh 31.4+ | `oh-my-posh-bin` (AUR) | needs the `claude` segment, added in 31.4 |
-| python3 | `python` | for the agent panel script, standard library only |
 | git | `git` | for the git segment |
 | A Nerd Font | `ttf-nerd-fonts-symbols-mono` | icons; WezTerm has them built in |
 
 ## Install
 
 1. Install Oh My Posh: `paru -S oh-my-posh-bin` on Arch, or see [Oh My Posh](../README.md#oh-my-posh) for other systems.
-2. Link the two files into `~/.claude/`. `install.sh` does this when it finds Claude Code (`~/.claude` exists), or by hand:
+2. Link the statusline config into `~/.claude/`. `install.sh` does this when it finds Claude Code (`~/.claude` exists), or by hand:
 
    ```bash
    ln -s ~/dotfiles/claude/claude-statusline.omp.json ~/.claude/
-   ln -s ~/dotfiles/claude/subagent-statusline.py ~/.claude/
    ```
 
 3. Add this to `~/.claude/settings.json`, next to whatever is already in it. `settings.json` holds other settings too, so it isn't linked from the repo.
@@ -73,19 +73,20 @@ The bar always fills toward 200k tokens, whatever the model's real context windo
      "command": "oh-my-posh claude --config ~/.claude/claude-statusline.omp.json",
      "refreshInterval": 5
    },
-   "subagentStatusLine": {
-     "type": "command",
-     "command": "~/.claude/subagent-statusline.py"
+   "env": {
+     "CLAUDE_CODE_PLUGIN_DIRS": "~/dotfiles/claude/mods/subagent-rows"
    }
    ```
 
+   `CLAUDE_CODE_PLUGIN_DIRS` loads the agent panel mod straight from the repo in every session, and an interactive session reloads it when a file in it changes. If `env` already exists, add the key to it. Several folders are separated with `:`.
+
 4. Start a new Claude Code session.
 
-`refreshInterval` redraws the statusline every 5 seconds, so the clock and the agent rows keep moving while Claude works. Without it, the statusline only updates when the conversation changes.
+`refreshInterval` redraws the statusline every 5 seconds, so the clock keeps moving while Claude works. The agent rows refresh on their own every 5 seconds. Without it, the statusline only updates when the conversation changes.
 
 ## Customizing
 
-- **Colors:** the `palette` block at the top of `claude-statusline.omp.json`, and `PALETTE` in `subagent-statusline.py`. Both use the Catppuccin Frappé names.
+- **Colors:** the `palette` block at the top of `claude-statusline.omp.json`, and `PALETTE` in `mods/subagent-rows/hooks/register.ts`. Both use the Catppuccin Frappé names.
 - **Context thresholds:** search the `.omp.json` for `150000` and `200000`. The bar's `200000` divisor and the `/200k` label are in the same template.
 - **Rate-limit colors:** the `70` and `90` in the 5h and 7d segments' `foreground_templates` and `background_templates`.
 - **Segments:** each segment is one entry in a block's `segments` list. Delete one to drop it.
@@ -101,8 +102,11 @@ echo '{"model":{"display_name":"Opus 5.5"},"workspace":{"project_dir":"'$PWD'"},
 
 - **No 5h / 7d segments:** normal until the first reply in a session. Claude Code only sends usage limits for Claude subscriptions, so they also stay hidden when you sign in with an API key.
 - **Boxes instead of icons:** the terminal font has no Nerd Font icons. Install `ttf-nerd-fonts-symbols-mono` (kitty picks it up as a fallback) or use a Nerd Font.
-- **Agent rows look like Claude Code's defaults:** when the script can't render a row it prints nothing for it, and Claude Code falls back to its own row. Set `CLAUDE_STATUSLINE_DEBUG=1` in the `env` block of `settings.json`, spawn an agent, then run the script on the saved input. Any agent missing from its output is one the script couldn't render:
+- **Agent rows look like Claude Code's defaults:** the mod isn't loaded, or its hook threw and fell back to the default row. Check `CLAUDE_CODE_PLUGIN_DIRS` in `settings.json`, then run the mod's checks and tests:
 
   ```bash
-  ~/.claude/subagent-statusline.py < ~/.cache/claude-statusline/subagent-input.json
+  claude plugin validate ~/dotfiles/claude/mods/subagent-rows
+  claude plugin test ~/dotfiles/claude/mods/subagent-rows
   ```
+
+  `claude --debug` logs a line for any hook the engine skipped.
